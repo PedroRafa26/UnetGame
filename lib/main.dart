@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:four_unet_one/menu.dart';
+import 'package:flutter/services.dart';
+import 'package:four_unet_one/screens/menu.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+  ));
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
