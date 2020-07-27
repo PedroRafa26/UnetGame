@@ -14,7 +14,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Unetmes',
-      theme: ThemeData(primarySwatch: Colors.green),
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+        fontFamily: 'WildHazelnut',
+        textSelectionColor: Colors.white,
+        textTheme: TextTheme(
+
+        ),
+      ),
       home: Menu(),
     );
   }
