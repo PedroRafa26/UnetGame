@@ -11,7 +11,7 @@ class Menu extends StatefulWidget {
 }
 
 class _MenuState extends State<Menu> {
-    bool more = false;
+  bool more = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,8 +74,7 @@ class _MenuState extends State<Menu> {
                   GestureDetector(
                     onTap: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (context) => Who()),
+                        MaterialPageRoute(builder: (context) => Who()),
                       );
                     },
                     child: ButtonMenu(
@@ -123,36 +122,49 @@ class _MenuState extends State<Menu> {
             ),
           ),
           (more)
-              ? Center(
-                  child: Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.indigo[900],
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text(
-                            'De momento solo tenemos esto.\nLo sentimos.\n #UnetenseLivesMatter',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
+              ? GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      more = false;
+                      print(more);
+                    });
+                  },
+                  child: Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    color: Color(0xAA000000),
+                    child: Center(
+                      child: Material(
+                        elevation: 5,
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.indigo[900],
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Text(
+                                'De momento solo tenemos esto.\nLo sentimos.\n #UnetenseLivesMatter',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.cancel,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    more = false;
+                                    print(more);
+                                  });
+                                },
+                              )
+                            ],
                           ),
-                          IconButton(
-                            icon: Icon(
-                              Icons.cancel,
-                              color: Colors.white,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                more = false;
-                                print(more);
-                              });
-                            },
-                          )
-                        ],
+                        ),
                       ),
                     ),
                   ),
