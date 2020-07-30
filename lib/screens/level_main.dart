@@ -21,36 +21,44 @@ class _LevelMainState extends State<LevelMain> {
       passed: false,
       word: 'REMY',
       message: 'Como dijo el chef Gusteau, cualquiera puede cocinar',
-      letters: 'AEGOMRLKASDYFI',
+      letters: 'REMYMEYAMEOAPA',
     ),
   ];
   Level prueba;
   List<Widget> input;
   List<String> inputWord;
   List<bool> letterInputSelected;
+  List<dynamic> idletterSelected;
+  List<String> lettersInput;
+  var previousPosition;
   var letterSelected;
   var position;
   var indexSelection;
   var victory;
+  dynamic flag;
 
   @override
   void initState() {
-    prueba=pruebas[0];
+    flag = "-";
+    prueba = pruebas[0];
+    idletterSelected = [];
     input = prueba.word
         .split("")
         .map((e) => LetterResolveItem(letter: ""))
         .toList();
     inputWord = [];
     position = 0;
+    previousPosition = 0;
     indexSelection = 0;
+    lettersInput = prueba.letters.split("")..shuffle();
     victory = false;
-    letterInputSelected = prueba.letters.split("").map((e) => false).toList();
+    letterInputSelected = lettersInput.map((e) => false).toList();
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<String> letters = prueba.letters.split("");
     return Scaffold(
       body: Stack(
         children: <Widget>[
@@ -125,7 +133,26 @@ class _LevelMainState extends State<LevelMain> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           Row(
-                            children: input,
+                            children: input
+                                .asMap()
+                                .entries
+                                .map(
+                                  (e) => InkWell(
+                                    onTap: () {
+                                      print('sacate Prro');
+                                      setState(() {
+                                        input[e.key] =
+                                            LetterResolveItem(letter: "");
+                                        letterInputSelected[
+                                            idletterSelected[e.key]] = false;
+                                        idletterSelected[e.key] = "-";
+                                        position = e.key;
+                                      });
+                                    },
+                                    child: e.value,
+                                  ),
+                                )
+                                .toList(),
                           ),
                           IconButton(
                             icon: Icon(
@@ -134,7 +161,9 @@ class _LevelMainState extends State<LevelMain> {
                             ),
                             onPressed: () {
                               setState(() {
+                                flag = "-";
                                 position = 0;
+                                previousPosition = 0;
                                 print(position.toString());
                                 inputWord = [];
                                 input = prueba.word
@@ -146,6 +175,7 @@ class _LevelMainState extends State<LevelMain> {
                                     .split("")
                                     .map((e) => false)
                                     .toList();
+                                idletterSelected = [];
                               });
                             },
                           ),
@@ -159,7 +189,7 @@ class _LevelMainState extends State<LevelMain> {
                       var buttonWidth = box.maxWidth / 9;
                       var buttonHeigth = box.maxHeight / 3;
                       return Wrap(
-                        children: letters.asMap().entries.map((e) {
+                        children: lettersInput.asMap().entries.map((e) {
                           return InkWell(
                             onTap: (position == prueba.word.length ||
                                     letterInputSelected[e.key])
@@ -168,14 +198,53 @@ class _LevelMainState extends State<LevelMain> {
                                     setState(() {
                                       letterSelected = e.value;
                                       print(letterSelected);
-                                      inputWord.add(e.value);
-                                      print(input[position].toString());
-                                      input[position] =
-                                          LetterResolveItem(letter: e.value);
-                                      position++;
-                                      print(inputWord);
-                                      print(position.toString());
-                                      letterInputSelected[e.key] = true;
+                                      if (idletterSelected.length != 0) {
+                                        print('Entramos primera');
+                                        for (var i = 0;
+                                            i < idletterSelected.length;
+                                            i++) {
+                                          if (idletterSelected[i] == "-") {
+                                            flag = i;
+                                            break;
+                                          }
+                                          if (i ==
+                                              idletterSelected.length - 1) {
+                                            flag = "-";
+                                          }
+                                        }
+                                        position = (flag == "-")
+                                            ? idletterSelected.length
+                                            : flag;
+                                        if (previousPosition > position) {
+                                          print('Caso espacial');
+                                          input[position] = LetterResolveItem(
+                                              letter: e.value);
+                                          letterInputSelected[e.key] = true;
+                                          idletterSelected[position] = e.key;
+                                        } else {
+                                          inputWord.add(e.value);
+                                          print(input[position].toString());
+                                          input[position] = LetterResolveItem(
+                                              letter: e.value);
+                                          idletterSelected.add(e.key);
+                                          previousPosition = position;
+                                          position = idletterSelected.length;
+                                          print(inputWord);
+                                          print(position.toString());
+                                          letterInputSelected[e.key] = true;
+                                        }
+                                      } else {
+                                        inputWord.add(e.value);
+                                        print(input[position].toString());
+                                        input[position] =
+                                            LetterResolveItem(letter: e.value);
+                                        idletterSelected.add(e.key);
+                                        previousPosition = position;
+                                        position = idletterSelected.length;
+                                        print(inputWord);
+                                        print(position.toString());
+                                        letterInputSelected[e.key] = true;
+                                      }
                                       if (position == prueba.word.length) {
                                         var result = inputWord.reduce(
                                             (value, element) =>
@@ -278,19 +347,24 @@ class _LevelMainState extends State<LevelMain> {
                                   shape: StadiumBorder(),
                                   onPressed: () {
                                     setState(() {
-                                      prueba=pruebas[prueba.id++];
+                                      prueba = pruebas[prueba.id++];
+                                      flag = "-";
+                                      idletterSelected = [];
+                                      input = prueba.word
+                                          .split("")
+                                          .map((e) =>
+                                              LetterResolveItem(letter: ""))
+                                          .toList();
+                                      inputWord = [];
                                       position = 0;
-                                print(position.toString());
-                                inputWord = [];
-                                input = prueba.word
-                                    .split("")
-                                    .map((e) => LetterResolveItem(letter: ""))
-                                    .toList();
-                                print(inputWord);
-                                letterInputSelected = prueba.letters
-                                    .split("")
-                                    .map((e) => false)
-                                    .toList();
+                                      previousPosition = 0;
+                                      indexSelection = 0;
+                                      lettersInput = prueba.letters.split("")
+                                        ..shuffle();
+                                      victory = false;
+                                      letterInputSelected = lettersInput
+                                          .map((e) => false)
+                                          .toList();
                                       victory = false;
                                       print(victory);
                                     });
