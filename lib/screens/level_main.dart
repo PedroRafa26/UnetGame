@@ -3,28 +3,30 @@ import 'package:four_unet_one/global_widgets/back.dart';
 import 'package:four_unet_one/level/level.dart';
 
 class LevelMain extends StatefulWidget {
+  final List<Level> levels;
+  LevelMain(this.levels);
   @override
   _LevelMainState createState() => _LevelMainState();
 }
 
 class _LevelMainState extends State<LevelMain> {
-  List<Level> pruebas = [
-    Level(
-      id: 1,
-      passed: false,
-      word: 'INDUSTRIAL',
-      message: 'Estuvo tan fácil como la carrera',
-      letters: 'UGTINDOSTLRAIN',
-    ),
-    Level(
-      id: 2,
-      passed: false,
-      word: 'REMY',
-      message: 'Como dijo el chef Gusteau, cualquiera puede cocinar',
-      letters: 'REMYMEYAMEOAPA',
-    ),
-  ];
-  Level prueba;
+  // List<Level> prueba = [
+  //   Level(
+  //     id: 1,
+  //     passed: false,
+  //     word: 'INDUSTRIAL',
+  //     message: 'Estuvo tan fácil como la carrera',
+  //     letters: 'UGTINDOSTLRAIN',
+  //   ),
+  //   Level(
+  //     id: 2,
+  //     passed: false,
+  //     word: 'REMY',
+  //     message: 'Como dijo el chef Gusteau, cualquiera puede cocinar',
+  //     letters: 'REMYMEYAMEOAPA',
+  //   ),
+  // ];
+  Level level;
   List<Widget> input;
   List<String> inputWord;
   List<bool> letterInputSelected;
@@ -40,17 +42,15 @@ class _LevelMainState extends State<LevelMain> {
   @override
   void initState() {
     flag = "-";
-    prueba = pruebas[0];
+    level = widget.levels[0];
     idletterSelected = [];
-    input = prueba.word
-        .split("")
-        .map((e) => LetterResolveItem(letter: ""))
-        .toList();
+    input =
+        level.word.split("").map((e) => LetterResolveItem(letter: "")).toList();
     inputWord = [];
     position = 0;
     previousPosition = 0;
     indexSelection = 0;
-    lettersInput = prueba.letters.split("")..shuffle();
+    lettersInput = level.letters.split("")..shuffle();
     victory = false;
     letterInputSelected = lettersInput.map((e) => false).toList();
 
@@ -89,7 +89,7 @@ class _LevelMainState extends State<LevelMain> {
                       Expanded(
                         flex: 2,
                         child: Text(
-                          'Nivel ${prueba.id}',
+                          'Nivel ${level.id}',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white,
@@ -115,10 +115,10 @@ class _LevelMainState extends State<LevelMain> {
                       child: Wrap(
                         alignment: WrapAlignment.center,
                         children: <Widget>[
-                          LevelImage(id: prueba.id, index: 1),
-                          LevelImage(id: prueba.id, index: 2),
-                          LevelImage(id: prueba.id, index: 4),
-                          LevelImage(id: prueba.id, index: 3),
+                          LevelImage(id: level.id, index: 1),
+                          LevelImage(id: level.id, index: 2),
+                          LevelImage(id: level.id, index: 4),
+                          LevelImage(id: level.id, index: 3),
                         ],
                       ),
                     ),
@@ -166,12 +166,12 @@ class _LevelMainState extends State<LevelMain> {
                                 previousPosition = 0;
                                 print(position.toString());
                                 inputWord = [];
-                                input = prueba.word
+                                input = level.word
                                     .split("")
                                     .map((e) => LetterResolveItem(letter: ""))
                                     .toList();
                                 print(inputWord);
-                                letterInputSelected = prueba.letters
+                                letterInputSelected = level.letters
                                     .split("")
                                     .map((e) => false)
                                     .toList();
@@ -191,9 +191,45 @@ class _LevelMainState extends State<LevelMain> {
                       return Wrap(
                         children: lettersInput.asMap().entries.map((e) {
                           return InkWell(
-                            onTap: (position == prueba.word.length ||
+                            onTap: (inputWord.length == level.word.length ||
                                     letterInputSelected[e.key])
-                                ? () {}
+                                ? () {
+                                    setState(() {
+                                      for (var i = 0;
+                                          i < idletterSelected.length;
+                                          i++) {
+                                        if (idletterSelected[i] == "-") {
+                                          flag = i;
+                                          break;
+                                        }
+                                        if (i == idletterSelected.length - 1) {
+                                          flag = "-";
+                                        }
+                                      }
+                                      position = (flag == "-")
+                                          ? idletterSelected.length
+                                          : flag;
+                                      if (previousPosition >= position) {
+                                        print('Caso espacial');
+                                        input[position] =
+                                            LetterResolveItem(letter: e.value);
+                                        letterInputSelected[e.key] = true;
+                                        idletterSelected[position] = e.key;
+                                        inputWord[position] = e.value;
+                                        print(inputWord);
+                                        print(position.toString());
+                                      }
+                                      if (inputWord.length ==
+                                          level.word.length) {
+                                        var result = inputWord.reduce(
+                                            (value, element) =>
+                                                value + '' + element);
+                                        if (result == level.word) {
+                                          victory = true;
+                                        }
+                                      }
+                                    });
+                                  }
                                 : () {
                                     setState(() {
                                       letterSelected = e.value;
@@ -245,11 +281,12 @@ class _LevelMainState extends State<LevelMain> {
                                         print(position.toString());
                                         letterInputSelected[e.key] = true;
                                       }
-                                      if (position == prueba.word.length) {
+                                      if (inputWord.length ==
+                                          level.word.length) {
                                         var result = inputWord.reduce(
                                             (value, element) =>
                                                 value + '' + element);
-                                        if (result == prueba.word) {
+                                        if (result == level.word) {
                                           victory = true;
                                         }
                                       }
@@ -326,7 +363,7 @@ class _LevelMainState extends State<LevelMain> {
                                   width: MediaQuery.of(context).size.width * .3,
                                   child: Center(
                                     child: Text(
-                                      prueba.message,
+                                      level.message,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                           color: Colors.white,
@@ -335,41 +372,59 @@ class _LevelMainState extends State<LevelMain> {
                                     ),
                                   ),
                                 ),
-                                RaisedButton(
-                                  child: Text(
-                                    'Siguiente',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 25,
-                                    ),
-                                  ),
-                                  color: Colors.green,
-                                  shape: StadiumBorder(),
-                                  onPressed: () {
-                                    setState(() {
-                                      prueba = pruebas[prueba.id++];
-                                      flag = "-";
-                                      idletterSelected = [];
-                                      input = prueba.word
-                                          .split("")
-                                          .map((e) =>
-                                              LetterResolveItem(letter: ""))
-                                          .toList();
-                                      inputWord = [];
-                                      position = 0;
-                                      previousPosition = 0;
-                                      indexSelection = 0;
-                                      lettersInput = prueba.letters.split("")
-                                        ..shuffle();
-                                      victory = false;
-                                      letterInputSelected = lettersInput
-                                          .map((e) => false)
-                                          .toList();
-                                      victory = false;
-                                      print(victory);
-                                    });
-                                  },
-                                )
+                                (level.id != widget.levels.length)
+                                    ? RaisedButton(
+                                        child: Text(
+                                          'Siguiente',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 25,
+                                          ),
+                                        ),
+                                        color: Colors.green,
+                                        shape: StadiumBorder(),
+                                        onPressed: () {
+                                          setState(() {
+                                            level = widget.levels[level.id++];
+                                            flag = "-";
+                                            idletterSelected = [];
+                                            input = level.word
+                                                .split("")
+                                                .map((e) => LetterResolveItem(
+                                                    letter: ""))
+                                                .toList();
+                                            inputWord = [];
+                                            position = 0;
+                                            previousPosition = 0;
+                                            indexSelection = 0;
+                                            lettersInput = level.letters
+                                                .split("")
+                                                  ..shuffle();
+                                            victory = false;
+                                            letterInputSelected = lettersInput
+                                                .map((e) => false)
+                                                .toList();
+                                            victory = false;
+                                            print(victory);
+                                          });
+                                        },
+                                      )
+                                    : RaisedButton(
+                                        child: Text(
+                                          'Volver Al Menu',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 25,
+                                          ),
+                                        ),
+                                        color: Colors.green,
+                                        shape: StadiumBorder(),
+                                        onPressed: () {
+                                          setState(() {
+                                            Navigator.of(context).pop();
+                                          });
+                                        },
+                                      )
                               ],
                             ),
                           ),
@@ -385,6 +440,7 @@ class _LevelMainState extends State<LevelMain> {
   }
 }
 
+// ignore: must_be_immutable
 class LetterResolveItem extends StatelessWidget {
   LetterResolveItem({
     Key key,

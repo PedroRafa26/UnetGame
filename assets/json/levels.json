@@ -1,0 +1,39 @@
+{
+    "levels": [
+        {
+            "id": 1,
+            "passed": false,
+            "word": "INDUSTRIAL",
+            "message": "Estuvo tan fácil como la carrera",
+            "letters": "UGTINDOSTLRAIN"
+        },
+        {
+            "id": 2,
+            "passed": false,
+            "word": "MECANICA",
+            "message": "See See claro, es la mejor carrera de todas. \nFelices",
+            "letters": "MECANICATENSOR"
+        },
+        {
+            "id": 3,
+            "passed": false,
+            "word": "CIRCUITOS",
+            "message": "Preguntale a tu amigo de Electrónica por Douglas",
+            "letters": "CIRCUITOSFMLAR"
+        },
+        {
+            "id": 4,
+            "passed": false,
+            "word": "COCHINERAS",
+            "message": "Cuenta la leyenda que en algún momento fue un sitio de estudio.",
+            "letters": "COCHINERASMETA"
+        },
+        {
+            "id": 5,
+            "passed": false,
+            "word": "VILLA",
+            "message": "Sic Mundus Creatus Villa.",
+            "letters": "VILLAEJOTOELSP"
+        }
+    ]
+}
