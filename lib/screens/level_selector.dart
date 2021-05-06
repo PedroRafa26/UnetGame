@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:four_unet_one/global_widgets/back.dart';
+import 'package:four_unet_one/level/level.dart';
+import 'package:four_unet_one/screens/level_main.dart';
 
 final List<BorderRadius> _buttonBorders = [
   BorderRadius.only(
@@ -29,6 +31,8 @@ final List<BorderRadius> _buttonBorders = [
 ];
 
 class LevelSelector extends StatelessWidget {
+  final List<Level> levels;
+  LevelSelector(this.levels);
   @override
   Widget build(BuildContext context) {
     //Maneje el body del Scaffold con un Stack, cuyo primer widget sea el Back()
@@ -59,32 +63,40 @@ class LevelSelector extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
-                              OutlineButton(
-                                borderSide: BorderSide(color: Colors.white),
-                                padding: EdgeInsets.all(0),
-                                child: Icon(
-                                  Icons.arrow_left,
-                                  color: Colors.white,
-                                  size: 60,
-                                ),
-                                shape: CircleBorder(),
-                                highlightedBorderColor: Colors.white,
-                                highlightColor: Colors.white,
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                              Text(
-                                'Seleciona un nivel',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'WildHazelnut',
-                                  color: Colors.white,
-                                  fontSize: 25,
+                              Expanded(
+                                child: OutlineButton(
+                                  borderSide: BorderSide(color: Colors.white),
+                                  padding: EdgeInsets.all(0),
+                                  child: Icon(
+                                    Icons.arrow_left,
+                                    color: Colors.white,
+                                    size: 50,
+                                  ),
+                                  shape: CircleBorder(),
+                                  highlightedBorderColor: Colors.white,
+                                  highlightColor: Colors.white,
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
                                 ),
                               ),
-                              Image.asset(
-                                'assets/images/layout/logo.png',
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  'Seleciona un nivel',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'WildHazelnut',
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Image.asset(
+                                    'assets/images/layout/logo.png',
+                                    height: 50,
+                                    fit: BoxFit.contain),
                               ),
                             ],
                           ),
@@ -120,9 +132,11 @@ class LevelSelector extends StatelessWidget {
                                   numberLevel: '${index + 1}',
                                   borderRadius:
                                       _buttonBorders[borderRadiusNumber],
+                                  levels: levels,
+                                  id: index,
                                 );
                               },
-                              itemCount: 20,
+                              itemCount: levels.length,
                             ),
                           ),
                         ),
@@ -137,8 +151,9 @@ class LevelSelector extends StatelessWidget {
                             'Tranquilo, amigo, ella volverá; \nQuien no vuelve es el semestre',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Colors.white,
-                            ),
+                                color: Colors.white,
+                                fontFamily: 'Montserrat',
+                                fontWeight: FontWeight.w700),
                           ),
                         ),
                       ),
@@ -160,8 +175,15 @@ class LevelSelector extends StatelessWidget {
 class LevelButton extends StatelessWidget {
   final String numberLevel;
   final BorderRadius borderRadius;
+  final List<Level> levels;
+  final int id;
 
-  LevelButton({@required this.numberLevel, this.borderRadius});
+  LevelButton({
+    @required this.numberLevel,
+    this.borderRadius,
+    this.levels,
+    this.id,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -174,24 +196,30 @@ class LevelButton extends StatelessWidget {
           context: context,
         );
       },
-      child: Container(
-        height: 5,
-        width: 5,
-        decoration: BoxDecoration(
-          borderRadius: this.borderRadius != null
-              ? this.borderRadius
-              : BorderRadius.all(
-                  Radius.circular(15),
-                ),
-          color: Colors.white,
-        ),
-        child: Center(
-          child: Text(
-            '${this.numberLevel}',
-            style: TextStyle(
-              color: Color(0xFF03245E),
-              fontFamily: 'SweetPurple',
-              fontSize: 35,
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => LevelMain(levels, id)));
+        },
+        child: Container(
+          height: 5,
+          width: 5,
+          decoration: BoxDecoration(
+            borderRadius: this.borderRadius != null
+                ? this.borderRadius
+                : BorderRadius.all(
+                    Radius.circular(15),
+                  ),
+            color: Colors.white,
+          ),
+          child: Center(
+            child: Text(
+              '${this.numberLevel}',
+              style: TextStyle(
+                color: Color(0xFF03245E),
+                fontFamily: 'SweetPurple',
+                fontSize: 35,
+              ),
             ),
           ),
         ),

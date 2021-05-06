@@ -12,7 +12,7 @@ class Back extends StatelessWidget {
       height: MediaQuery.of(context).size.height,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: <Color>[
+          List: [
             Color(0xFF03245E),
             Color(0xFF6b2a7b),
           ],

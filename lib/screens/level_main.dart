@@ -1,31 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:four_unet_one/global_widgets/back.dart';
 import 'package:four_unet_one/level/level.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LevelMain extends StatefulWidget {
   final List<Level> levels;
-  LevelMain(this.levels);
+  final int currentId;
+  LevelMain(this.levels, this.currentId);
   @override
   _LevelMainState createState() => _LevelMainState();
 }
 
 class _LevelMainState extends State<LevelMain> {
-  // List<Level> prueba = [
-  //   Level(
-  //     id: 1,
-  //     passed: false,
-  //     word: 'INDUSTRIAL',
-  //     message: 'Estuvo tan fácil como la carrera',
-  //     letters: 'UGTINDOSTLRAIN',
-  //   ),
-  //   Level(
-  //     id: 2,
-  //     passed: false,
-  //     word: 'REMY',
-  //     message: 'Como dijo el chef Gusteau, cualquiera puede cocinar',
-  //     letters: 'REMYMEYAMEOAPA',
-  //   ),
-  // ];
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  Future<int> _currentLevel;
+
   Level level;
   List<Widget> input;
   List<String> inputWord;
@@ -42,7 +31,7 @@ class _LevelMainState extends State<LevelMain> {
   @override
   void initState() {
     flag = "-";
-    level = widget.levels[0];
+    level = widget.levels[widget.currentId];
     idletterSelected = [];
     input =
         level.word.split("").map((e) => LetterResolveItem(letter: "")).toList();
@@ -83,7 +72,7 @@ class _LevelMainState extends State<LevelMain> {
                         highlightedBorderColor: Colors.white,
                         highlightColor: Colors.white,
                         onPressed: () {
-                          Navigator.of(context).pop();
+                          Navigator.of(context).pop(_currentLevel);
                         },
                       ),
                       Expanded(
@@ -146,6 +135,8 @@ class _LevelMainState extends State<LevelMain> {
                                         letterInputSelected[
                                             idletterSelected[e.key]] = false;
                                         idletterSelected[e.key] = "-";
+                                        inputWord[e.key] = "";
+                                        print(inputWord);
                                         position = e.key;
                                       });
                                     },
@@ -251,12 +242,15 @@ class _LevelMainState extends State<LevelMain> {
                                         position = (flag == "-")
                                             ? idletterSelected.length
                                             : flag;
-                                        if (previousPosition > position) {
-                                          print('Caso espacial');
+                                        if (previousPosition >= position) {
+                                          print('Caso espacial 1');
                                           input[position] = LetterResolveItem(
                                               letter: e.value);
                                           letterInputSelected[e.key] = true;
                                           idletterSelected[position] = e.key;
+                                          inputWord[position] = e.value;
+                                          print(inputWord);
+                                          print(position.toString());
                                         } else {
                                           inputWord.add(e.value);
                                           print(input[position].toString());
@@ -383,8 +377,20 @@ class _LevelMainState extends State<LevelMain> {
                                         ),
                                         color: Colors.green,
                                         shape: StadiumBorder(),
-                                        onPressed: () {
+                                        onPressed: () async {
+                                          final SharedPreferences prefs =
+                                              await _prefs;
+                                          final int currentLevel =
+                                              (prefs.getInt('currentLevel') ??
+                                                      0) +
+                                                  1;
                                           setState(() {
+                                            _currentLevel = prefs
+                                                .setInt("currentLevel",
+                                                    currentLevel)
+                                                .then((bool succes) {
+                                              return currentLevel;
+                                            });
                                             level = widget.levels[level.id++];
                                             flag = "-";
                                             idletterSelected = [];

@@ -106,8 +106,8 @@ class BackButtonMenu extends StatelessWidget {
           width: tWidth * .7,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: colors,
-              tileMode: TileMode.clamp,
+              List: colors,
+              // tileMode: TileMode.clamp,
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),

@@ -6,6 +6,7 @@ import 'package:four_unet_one/level/level.dart';
 import 'package:four_unet_one/screens/level_main.dart';
 import 'package:four_unet_one/screens/level_selector.dart';
 import 'package:four_unet_one/screens/who.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Menu extends StatefulWidget {
   @override
@@ -13,127 +14,171 @@ class Menu extends StatefulWidget {
 }
 
 class _MenuState extends State<Menu> {
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  Future<int> _currentLevel;
   bool more = false;
-  List<Level> levels;
+
+  @override
+  void initState() {
+    _currentLevel = _prefs.then((SharedPreferences prefs) {
+      return (prefs.getInt('currentLevel') ?? 0);
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: Stack(
         children: <Widget>[
           Back(),
-          FutureBuilder(
-            future: getLevels(),
-            builder: (context, snapshot) {
-              if(!snapshot.hasData){
-                return SizedBox();
-              }
-              return SafeArea(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      // SvgPicture.asset(
-                      //   'assets/images/layout/logo.svg'
-                      //   semanticsLabel: 'Unetmes Logo'
-                      // ),
-                      Image.asset('assets/images/layout/logo.png'),
-                      Text(
-                        'Nombre del juego',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 30,
-                        ),
-                      ),
-                      SizedBox(height: 50),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (context) => LevelMain(snapshot.data))
-                          );
-                        },
-                        child: ButtonMenu(
-                          colors: [
-                            Color(0xFF00e07f),
-                            Color(0xff349061),
-                            Color(0xff00e07f),
-                          ],
-                          menuLabel: 'Jugar',
-                          icon: Icons.play_circle_outline,
-                          direction: 0,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => LevelSelector()),
-                          );
-                        },
-                        child: ButtonMenu(
-                          colors: [
-                            Color(0xFFd68839),
-                            Color(0xffff6633),
-                            Color(0xffe07f37),
-                          ],
-                          menuLabel: 'Ver Niveles',
-                          icon: Icons.remove_circle_outline,
-                          direction: 2,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (context) => Who()),
-                          );
-                        },
-                        child: ButtonMenu(
-                          colors: [
-                            Color(0xFFfb677d),
-                            Color(0xffff5858),
-                            Color(0xfffc5777),
-                          ],
-                          menuLabel: '¿ Qué Somos ?',
-                          icon: Icons.info_outline,
-                          direction: 0,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            more = true;
-                          });
-                          print(more);
-                        },
-                        child: ButtonMenu(
-                          colors: [
-                            Color(0xFF17d5f9),
-                            Color(0xff03c4fe),
-                            Color(0xff33ecf2),
-                          ],
-                          menuLabel: 'Algo más ...',
-                          icon: Icons.add_circle_outline,
-                          direction: 2,
-                        ),
-                      ),
-                      SizedBox(height: 50),
-                      Text(
-                        'Mas que una universidad,\nsomos un meme.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontFamily: 'Montserrat',
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              );
-            }
-          ),
+          FutureBuilder<int>(
+              future: _currentLevel,
+              builder: (context, cLevel) {
+                switch (cLevel.connectionState) {
+                  case ConnectionState.waiting:
+                    return CircularProgressIndicator();
+                  default:
+                    if (cLevel.hasError) {
+                      return Center(
+                        child: Text('Ocurrio algun error'),
+                      );
+                    }
+                    return FutureBuilder(
+                        future: getLevels(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final levels = snapshot.data;
+                            List<Level> passedLevels = [];
+                            for (var i = 0; i < levels.length; i++) {
+                              passedLevels.add(levels[i]);
+                              passedLevels[i].passed =
+                                  (i < cLevel.data) ? true : false;
+                            }
+                            return SafeArea(
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: <Widget>[
+                                    Image.asset(
+                                        'assets/images/layout/logo.png'),
+                                    Text(
+                                      'Nombre del juego',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 30,
+                                      ),
+                                    ),
+                                    SizedBox(height: 50),
+                                    GestureDetector(
+                                      onTap: () async {
+                                        final result =  await Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) => LevelMain(
+                                              snapshot.data,
+                                              cLevel.data,
+                                            ),
+                                          ),
+                                        );
+                                        final SharedPreferences prefs =
+                                              await _prefs;
+                                        setState(() {
+                                          _currentLevel = prefs
+                                                .setInt("currentLevel",
+                                                    result)
+                                                .then((bool succes) {
+                                              return result;
+                                            });
+                                        });
+                                      },
+                                      child: ButtonMenu(
+                                        colors: [
+                                          Color(0xFF00e07f),
+                                          Color(0xff349061),
+                                          Color(0xff00e07f),
+                                        ],
+                                        menuLabel: 'Jugar',
+                                        icon: Icons.play_circle_outline,
+                                        direction: 0,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                LevelSelector(passedLevels),
+                                          ),
+                                        );
+                                      },
+                                      child: ButtonMenu(
+                                        colors: [
+                                          Color(0xFFd68839),
+                                          Color(0xffff6633),
+                                          Color(0xffe07f37),
+                                        ],
+                                        menuLabel: 'Ver Niveles',
+                                        icon: Icons.remove_circle_outline,
+                                        direction: 2,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (context) => Who()),
+                                        );
+                                      },
+                                      child: ButtonMenu(
+                                        colors: [
+                                          Color(0xFFfb677d),
+                                          Color(0xffff5858),
+                                          Color(0xfffc5777),
+                                        ],
+                                        menuLabel: '¿ Qué Somos ?',
+                                        icon: Icons.info_outline,
+                                        direction: 0,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          more = true;
+                                        });
+                                        print(more);
+                                      },
+                                      child: ButtonMenu(
+                                        colors: [
+                                          Color(0xFF17d5f9),
+                                          Color(0xff03c4fe),
+                                          Color(0xff33ecf2),
+                                        ],
+                                        menuLabel: 'Algo más ...',
+                                        icon: Icons.add_circle_outline,
+                                        direction: 2,
+                                      ),
+                                    ),
+                                    SizedBox(height: 50),
+                                    Text(
+                                      'Mas que una universidad,\nsomos un meme.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontFamily: 'Montserrat',
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+                          return SizedBox();
+                        });
+                }
+              }),
           (more)
               ? GestureDetector(
                   onTap: () {
